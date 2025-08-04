@@ -2,25 +2,29 @@
 
 ## Descripción General
 
-Este proyecto utiliza Prisma como ORM para manejar la base de datos PostgreSQL. El esquema incluye todos los modelos necesarios para un ecommerce de zapatillas.
+Este proyecto utiliza Prisma como ORM para manejar la base de datos PostgreSQL. El esquema está simplificado para facilitar el desarrollo y mantenimiento del ecommerce de zapatillas.
 
 ## Modelos de Base de Datos
 
 ### 🏪 **Entidades Principales**
-- **User**: Usuarios del sistema (clientes y administradores)
-- **Product**: Productos (zapatillas) con información detallada
-- **Category**: Categorías de productos (Running, Basketball, etc.)
-- **Brand**: Marcas de zapatillas (Nike, Adidas, etc.)
-- **Order**: Órdenes de compra
-- **OrderItem**: Items individuales en cada orden
 
-### 📏 **Gestión de Tallas**
-- **Size**: Definición de tallas (US, EU, UK)
-- **ProductSize**: Relación producto-talla con stock específico
+#### **Product**
+- `id`: Identificador único (autoincrement)
+- `name`: Nombre del producto
+- `price`: Precio en formato Float
+- `image`: URL de la imagen principal
+- `sizes`: Array de tallas disponibles (ej: ["38", "39", "40"])
+- `colors`: Array de colores disponibles (ej: ["Negro", "Blanco"])
+- `stock`: Cantidad total en stock
+- `createdAt`: Fecha de creación
 
-### 📍 **Información de Usuario**
-- **Address**: Direcciones de envío de usuarios
-- **Review**: Reseñas de productos
+#### **Order**
+- `id`: Identificador único (autoincrement)
+- `userId`: ID del usuario que realizó la orden
+- `products`: JSON con lista de productos (ID, cantidad, talla, color)
+- `total`: Total de la orden
+- `status`: Estado de la orden (ej: "pendiente", "enviado")
+- `createdAt`: Fecha de creación
 
 ## Comandos de Base de Datos
 
@@ -58,29 +62,24 @@ DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/ecommerce_zapatill
 
 ## Estructura del Esquema
 
-### Relaciones Principales
-- **Product** → **Category** (muchos a uno)
-- **Product** → **Brand** (muchos a uno)
-- **Product** ↔ **Size** (muchos a muchos a través de ProductSize)
-- **User** → **Order** (uno a muchos)
-- **Order** → **OrderItem** (uno a muchos)
-- **Product** → **Review** (uno a muchos)
+### Características del Diseño Simplificado
+- **IDs autoincrement**: Uso de enteros para IDs más simples
+- **Arrays para tallas y colores**: Fácil manejo de variantes
+- **JSON para productos en órdenes**: Flexibilidad en la estructura de datos
+- **Sin relaciones complejas**: Diseño más directo y fácil de mantener
 
-### Características Especiales
-- **Stock por talla**: Cada producto puede tener stock diferente por talla
-- **Precios de oferta**: Campo `salePrice` para descuentos
-- **Múltiples imágenes**: Array de URLs para cada producto
-- **Estados de orden**: Enum con diferentes estados de pedido
-- **Roles de usuario**: USER y ADMIN
+### Ventajas del Esquema Simplificado
+- ✅ **Fácil de entender**: Menos modelos y relaciones
+- ✅ **Rápido de implementar**: Menos complejidad
+- ✅ **Flexible**: JSON permite estructuras dinámicas
+- ✅ **Mantenible**: Menos código para mantener
 
 ## Datos de Ejemplo
 
 El seed incluye:
-- **4 categorías**: Running, Basketball, Casual, Soccer
-- **4 marcas**: Nike, Adidas, Puma, New Balance
-- **5 tallas**: US 7-11 con equivalencias EU/UK
-- **4 productos**: Zapatillas de ejemplo con imágenes
-- **1 usuario admin**: admin@ecommerce.com
+- **5 productos**: Nike Air Max 270, Adidas Ultraboost 22, Puma RS-X, New Balance 574, Nike LeBron 19
+- **2 órdenes**: Ejemplos de pedidos con diferentes productos
+- **Múltiples tallas y colores**: Arrays con opciones variadas
 
 ## Uso en SvelteKit
 
@@ -91,35 +90,39 @@ import { prisma } from '$lib/prisma';
 
 ### Ejemplos de Consultas
 ```typescript
-// Obtener productos con categoría y marca
-const products = await prisma.product.findMany({
-  include: {
-    category: true,
-    brand: true,
-    sizes: {
-      include: {
-        size: true
-      }
+// Obtener todos los productos
+const products = await prisma.product.findMany();
+
+// Obtener producto por ID
+const product = await prisma.product.findUnique({
+  where: { id: 1 }
+});
+
+// Obtener productos con stock disponible
+const availableProducts = await prisma.product.findMany({
+  where: {
+    stock: {
+      gt: 0
     }
   }
 });
 
-// Obtener productos por categoría
-const runningShoes = await prisma.product.findMany({
+// Obtener órdenes de un usuario
+const userOrders = await prisma.order.findMany({
   where: {
-    category: {
-      name: 'Running'
-    }
+    userId: 1
   }
 });
 
-// Obtener stock de un producto por talla
-const stock = await prisma.productSize.findFirst({
-  where: {
-    productId: 'product-id',
-    size: {
-      name: 'US 9'
-    }
+// Crear nueva orden
+const newOrder = await prisma.order.create({
+  data: {
+    userId: 1,
+    products: [
+      { productId: 1, quantity: 2, size: '40', color: 'Negro' }
+    ],
+    total: 259.98,
+    status: 'pendiente'
   }
 });
 ```
@@ -141,6 +144,35 @@ npx prisma migrate deploy
 npx prisma migrate reset
 ```
 
+## Estructura de Datos JSON
+
+### Formato de Productos en Órdenes
+```json
+[
+  {
+    "productId": 1,
+    "quantity": 2,
+    "size": "40",
+    "color": "Negro"
+  },
+  {
+    "productId": 3,
+    "quantity": 1,
+    "size": "41",
+    "color": "Blanco"
+  }
+]
+```
+
+### Formato de Tallas y Colores
+```typescript
+// Tallas disponibles
+sizes: ["38", "39", "40", "41", "42", "43"]
+
+// Colores disponibles
+colors: ["Negro", "Blanco", "Gris", "Azul", "Rojo"]
+```
+
 ## Troubleshooting
 
 ### Problemas Comunes
@@ -160,4 +192,5 @@ npm run db:seed
 1. Configurar base de datos PostgreSQL
 2. Ejecutar migraciones iniciales
 3. Poblar con datos de ejemplo
-4. Integrar con la aplicación SvelteKit 
+4. Integrar con la aplicación SvelteKit
+5. Implementar funcionalidades de carrito y checkout 
