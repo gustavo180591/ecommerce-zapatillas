@@ -18,7 +18,8 @@
 		"db:migrate": "prisma migrate dev",
 		"db:seed": "tsx prisma/seed.ts",
 		"db:studio": "prisma studio",
-		"docker:studio": "./scripts/prisma-studio.sh"
+		"docker:studio": "./scripts/prisma-studio.sh",
+		"add-test-product": "tsx scripts/add-test-product.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -47,6 +48,7 @@
 	},
 	"dependencies": {
 		"@prisma/client": "^6.13.0",
+		"mercadopago": "^2.8.0",
 		"prisma": "^6.13.0"
 	}
 }

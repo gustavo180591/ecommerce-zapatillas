@@ -29,6 +29,7 @@ model Order {
   userId    Int
   products  Json     // Lista de productos (ID, cantidad)
   total     Float
-  status    String   // Ej. "pendiente", "enviado"
+  status    String   // Ej. "pendiente", "enviado", "approved", "rejected"
+  paymentId String?  // ID del pago en Mercado Pago
   createdAt DateTime @default(now())
 }
