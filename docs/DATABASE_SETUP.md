@@ -30,7 +30,7 @@ sudo service postgresql start
 brew services start postgresql
 
 # Verificar que esté corriendo
-pg_isready -h localhost -p 5432
+pg_isready -h localhost -p 5435
 ```
 
 ### 2. Crear Base de Datos
@@ -53,7 +53,7 @@ CREATE DATABASE ecommerce_zapatillas;
 Crear archivo `.env` en la raíz del proyecto:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ecommerce_zapatillas"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5435/ecommerce_zapatillas"
 ```
 
 **Nota**: Ajusta el usuario y contraseña según tu configuración de PostgreSQL.
@@ -85,7 +85,7 @@ npm run db:studio
 ### 1. Verificar Conexión
 ```bash
 # Verificar que PostgreSQL esté corriendo
-pg_isready -h localhost -p 5432
+pg_isready -h localhost -p 5435
 
 # Verificar que la base de datos existe
 sudo -u postgres psql -c "\l" | grep ecommerce
@@ -137,7 +137,7 @@ sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
 ### Error: Connection refused
 ```bash
 # Verificar que PostgreSQL esté escuchando en el puerto correcto
-sudo netstat -tlnp | grep 5432
+sudo netstat -tlnp | grep 5435
 
 # Si no está escuchando, reiniciar el servicio
 sudo service postgresql restart
@@ -148,7 +148,7 @@ sudo service postgresql restart
 ### Usuario y Contraseña por Defecto
 - **Usuario**: postgres
 - **Contraseña**: postgres
-- **Puerto**: 5432
+- **Puerto**: 5435
 - **Base de datos**: ecommerce_zapatillas
 
 ### Cambiar Contraseña (Opcional)
@@ -160,7 +160,7 @@ ALTER USER postgres PASSWORD 'tu_nueva_contraseña';
 
 Luego actualizar el `DATABASE_URL` en `.env`:
 ```env
-DATABASE_URL="postgresql://postgres:tu_nueva_contraseña@localhost:5432/ecommerce_zapatillas"
+DATABASE_URL="postgresql://postgres:tu_nueva_contraseña@localhost:5435/ecommerce_zapatillas"
 ```
 
 ## Próximos Pasos

@@ -57,7 +57,7 @@ npm run db:studio
 Asegúrate de tener configurada la variable `DATABASE_URL` en tu archivo `.env`:
 
 ```env
-DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/ecommerce_zapatillas"
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5435/ecommerce_zapatillas"
 ```
 
 ## Estructura del Esquema
