@@ -2,18 +2,39 @@
 	import '../app.css';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import CartDrawer from '$lib/components/CartDrawer.svelte';
+	import CartButton from '$lib/components/CartButton.svelte';
+	import { cart, cartItemCount } from '$lib/stores/cart';
 
-	// Estado del carrito (en producción vendría de un store)
-	let cartItemCount = 0;
 	let isMenuOpen = false;
+	let isCartOpen = false;
 
 	onMount(() => {
-		// Simular items en carrito (en producción vendría de localStorage/store)
-		cartItemCount = 1;
+		// Cargar carrito desde localStorage al montar
+		try {
+			const savedCart = localStorage.getItem('ecommerce_cart');
+			if (savedCart) {
+				const parsedCart = JSON.parse(savedCart);
+				cart.set(parsedCart);
+			}
+		} catch (error) {
+			console.error('Error loading cart from localStorage:', error);
+		}
+
+		// Sincronizar con el servidor si el usuario está autenticado
+		// TODO: Implementar sincronización con el backend
 	});
 
 	function toggleMenu() {
 		isMenuOpen = !isMenuOpen;
+	}
+
+	function toggleCart() {
+		isCartOpen = !isCartOpen;
+		// Cerrar el menú móvil si está abierto
+		if (isMenuOpen) {
+			isMenuOpen = false;
+		}
 	}
 </script>
 
@@ -61,17 +82,8 @@
 						</svg>
 					</button>
 
-					<!-- Cart -->
-					<a href="/carrito" class="relative p-2 text-gray-600 hover:text-gray-900 transition-colors">
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-						</svg>
-						{#if cartItemCount > 0}
-							<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-								{cartItemCount}
-							</span>
-						{/if}
-					</a>
+					<!-- Cart Button -->
+					<CartButton on:click={toggleCart} itemCount={$cartItemCount} />
 				</div>
 
 				<!-- Mobile menu button -->
@@ -125,7 +137,10 @@
 	<!-- Main Content -->
 	<main class="flex-1">
 		<slot />
-	</main>
+		</main>
+
+	<!-- Cart Drawer -->
+	<CartDrawer bind:isOpen={isCartOpen} />
 
 	<!-- Footer -->
 	<footer class="bg-gray-800 text-white">
