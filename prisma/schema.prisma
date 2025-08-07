@@ -88,18 +88,157 @@ model CartItem {
   @@unique([cartId, productId, size, color])
 }
 
+enum OrderStatus {
+  DRAFT          // Borrador (carrito)
+  PENDING        // Pendiente de pago
+  PROCESSING     // Pago recibido, preparando envío
+  SHIPPED        // Enviado
+  DELIVERED      // Entregado
+  CANCELLED      // Cancelado
+  REFUNDED       // Reembolsado
+  FAILED         // Falló el pago
+  ON_HOLD        // En espera (por revisión)
+  COMPLETED      // Completado (entregado y finalizado)
+}
+
+enum PaymentStatus {
+  REQUIRES_ACTION  // Requiere autenticación adicional
+  REQUIRES_PAYMENT_METHOD  // Requiere método de pago
+  REQUIRES_CONFIRMATION    // Requiere confirmación
+  PROCESSING       // Procesando
+  REQUIRES_CAPTURE // Requiere captura
+  CANCELED         // Cancelado
+  SUCCEEDED        // Exitoso
+  FAILED           // Fallido
+  REFUNDED         // Reembolsado
+  PARTIALLY_REFUNDED // Parcialmente reembolsado
+  DISPUTED         // En disputa
+  REQUIRES_PAYOUT  // Requiere pago
+}
+
 model Order {
+  id              Int            @id @default(autoincrement())
+  user            User           @relation(fields: [userId], references: [id])
+  userId          Int
+  items           OrderItem[]
+  total           Float
+  subtotal        Float          // Precio antes de impuestos y envío
+  tax             Float          // Impuestos calculados
+  shippingCost    Float          // Costo de envío
+  status          OrderStatus    @default(DRAFT)
+  payment         Payment?       @relation(fields: [paymentId], references: [id])
+  paymentId       String?        @unique
+  shipping        ShippingAddress? @relation(fields: [shippingId], references: [id])
+  shippingId      Int?
+  contactInfo     Json           // Información de contacto
+  notes           String?        // Notas adicionales del pedido
+  trackingNumber  String?        // Número de seguimiento del envío
+  shippingCarrier String?        // Empresa de transporte
+  
+  // Metadata
+  ipAddress       String?        // Dirección IP del cliente
+  userAgent       String?        // User agent del navegador
+  
+  // Timestamps
+  paidAt          DateTime?      // Cuando se completó el pago
+  shippedAt       DateTime?      // Cuando se envió
+  deliveredAt     DateTime?      // Cuando se entregó
+  cancelledAt     DateTime?      // Cuando se canceló
+  refundedAt      DateTime?      // Cuando se reembolsó
+  
+  // System fields
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  order           Order[]
+  amount          Float
+  currency        String        @default("USD")
+  status          PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
+  paymentMethod   String?       // card, transfer, cash, etc.
+  paymentProvider String?       // stripe, mercadopago, etc.
+  providerId      String?       // ID del pago en el proveedor
+  receiptUrl      String?       // URL del recibo/recibo
+  
+  // Datos de la tarjeta (opcional, cifrado)
+  cardLast4       String?
+  cardBrand       String?
+  cardExpMonth    Int?
+  cardExpYear     Int?
+  
+  // Metadata
+  metadata        Json?         // Datos adicionales del proveedor
+  
+  // Timestamps
+  paidAt          DateTime?
+  failedAt        DateTime?
+  
+  // System fields
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([providerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ShippingAddress {
   id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id])
-  userId      Int
-  items       OrderItem[]
-  total       Float
-  status      String    @default("PENDING") // PENDING, PAID, SHIPPED, DELIVERED, CANCELLED
-  paymentId   String?   // ID del pago en Mercado Pago/Stripe
-  shipping    Json?     // Información de envío
-  contactInfo Json      // Información de contacto
+  name        String
+  address     String
+  address2    String?
+  city        String
+  state       String
+  postalCode  String
+  country     String    @default("Argentina")
+  phone       String?
+  email       String
+  
+  // Relaciones
+  orders      Order[]
+  user        User?     @relation(fields: [userId], references: [id])
+  userId      Int?
+  
+  // System fields
+  isDefault   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  
+  @@index([userId])
+}
+
+enum OrderStatus {
+  DRAFT          // Borrador (carrito)
+  PENDING        // Pendiente de pago
+  PROCESSING     // Pago recibido, preparando envío
+  SHIPPED        // Enviado
+  DELIVERED      // Entregado
+  CANCELLED      // Cancelado
+  REFUNDED       // Reembolsado
+  FAILED         // Falló el pago
+  ON_HOLD        // En espera (por revisión)
+  COMPLETED      // Completado (entregado y finalizado)
+}
+
+enum PaymentStatus {
+  REQUIRES_ACTION  // Requiere autenticación adicional
+  REQUIRES_PAYMENT_METHOD  // Requiere método de pago
+  REQUIRES_CONFIRMATION    // Requiere confirmación
+  PROCESSING       // Procesando
+  REQUIRES_CAPTURE // Requiere captura
+  CANCELED         // Cancelado
+  SUCCEEDED        // Exitoso
+  FAILED           // Fallido
+  REFUNDED         // Reembolsado
+  PARTIALLY_REFUNDED // Parcialmente reembolsado
+  DISPUTED         // En disputa
+  REQUIRES_PAYOUT  // Requiere pago
 }
 
 model OrderItem {
