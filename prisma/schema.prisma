@@ -11,33 +11,39 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  role      String   @default("USER") // ADMIN, USER
-  cart      Cart?
-  orders    Order[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  name         String?
+  password     String
+  role         String         @default("USER") // ADMIN, USER, MODERATOR
+  cart         Cart?
+  orders       Order[]
+  reviews          Review[]
+  reviewVotes      ReviewHelpful[]
+  shippingAddresses ShippingAddress[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }
 
 model Product {
-  id          Int         @id @default(autoincrement())
-  name        String
-  description String?
-  price       Float
-  image       String
-  sizes       String[]    // Available sizes (e.g., ["38", "39", "40"])
-  colors      String[]    // Available colors (e.g., ["Negro", "Blanco"])
-  stock       Int         @default(0) // Total stock across all variants
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  categoryId  Int?
-  variants    ProductVariant[] // Product variants with specific stock
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            Int              @id @default(autoincrement())
+  name          String
+  description   String?
+  price         Float
+  image         String
+  sizes         String[]         // Available sizes (e.g., ["38", "39", "40"])
+  colors        String[]         // Available colors (e.g., ["Negro", "Blanco"])
+  stock         Int              @default(0) // Total stock across all variants
+  category      Category?        @relation(fields: [categoryId], references: [id])
+  categoryId    Int?
+  variants      ProductVariant[] // Product variants with specific stock
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  reviews       Review[]
+  averageRating Float?           @default(0)
+  reviewCount   Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 }
 
 model ProductVariant {
@@ -88,6 +94,7 @@ model CartItem {
   @@unique([cartId, productId, size, color])
 }
 
+// Order status values
 enum OrderStatus {
   DRAFT          // Borrador (carrito)
   PENDING        // Pendiente de pago
@@ -101,6 +108,7 @@ enum OrderStatus {
   COMPLETED      // Completado (entregado y finalizado)
 }
 
+// Payment status values
 enum PaymentStatus {
   REQUIRES_ACTION  // Requiere autenticación adicional
   REQUIRES_PAYMENT_METHOD  // Requiere método de pago
@@ -114,6 +122,13 @@ enum PaymentStatus {
   PARTIALLY_REFUNDED // Parcialmente reembolsado
   DISPUTED         // En disputa
   REQUIRES_PAYOUT  // Requiere pago
+}
+
+// Review status values
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Order {
@@ -188,6 +203,50 @@ model Payment {
   @@index([createdAt])
 }
 
+model Review {
+  id            String         @id @default(cuid())
+  rating        Int            // 1-5 stars
+  title         String         @db.VarChar(200)
+  comment       String         @db.Text
+  status        ReviewStatus   @default(PENDING)
+  isVerified    Boolean        @default(false)
+  helpfulVotes  Int            @default(0)
+  user          User           @relation(fields: [userId], references: [id])
+  userId        Int
+  product       Product        @relation(fields: [productId], references: [id])
+  productId     Int
+  images        ReviewImage[]
+  helpfulVoters ReviewHelpful[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([productId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ReviewImage {
+  id        String   @id @default(cuid())
+  url       String
+  review    Review   @relation(fields: [reviewId], references: [id])
+  reviewId  String
+  createdAt DateTime @default(now())
+
+  @@index([reviewId])
+}
+
+model ReviewHelpful {
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  review    Review  @relation(fields: [reviewId], references: [id])
+  reviewId  String
+  createdAt DateTime @default(now())
+
+  @@id([userId, reviewId])
+  @@index([reviewId])
+}
+
 model ShippingAddress {
   id          Int       @id @default(autoincrement())
   name        String
@@ -213,33 +272,6 @@ model ShippingAddress {
   @@index([userId])
 }
 
-enum OrderStatus {
-  DRAFT          // Borrador (carrito)
-  PENDING        // Pendiente de pago
-  PROCESSING     // Pago recibido, preparando envío
-  SHIPPED        // Enviado
-  DELIVERED      // Entregado
-  CANCELLED      // Cancelado
-  REFUNDED       // Reembolsado
-  FAILED         // Falló el pago
-  ON_HOLD        // En espera (por revisión)
-  COMPLETED      // Completado (entregado y finalizado)
-}
-
-enum PaymentStatus {
-  REQUIRES_ACTION  // Requiere autenticación adicional
-  REQUIRES_PAYMENT_METHOD  // Requiere método de pago
-  REQUIRES_CONFIRMATION    // Requiere confirmación
-  PROCESSING       // Procesando
-  REQUIRES_CAPTURE // Requiere captura
-  CANCELED         // Cancelado
-  SUCCEEDED        // Exitoso
-  FAILED           // Fallido
-  REFUNDED         // Reembolsado
-  PARTIALLY_REFUNDED // Parcialmente reembolsado
-  DISPUTED         // En disputa
-  REQUIRES_PAYOUT  // Requiere pago
-}
 
 model OrderItem {
   id        Int      @id @default(autoincrement())

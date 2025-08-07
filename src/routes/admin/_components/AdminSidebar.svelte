@@ -9,13 +9,15 @@
     Users,
     Settings,
     LogOut,
-    Home
+    Home,
+    MessageSquare
   } from 'lucide-svelte';
 
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Productos', href: '/admin/products', icon: Package },
     { name: 'Órdenes', href: '/admin/orders', icon: ShoppingCart },
+    { name: 'Reseñas', href: '/admin/reviews', icon: MessageSquare },
     { name: 'Usuarios', href: '/admin/users', icon: Users },
     { name: 'Configuración', href: '/admin/settings', icon: Settings }
   ];

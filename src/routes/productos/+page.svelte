@@ -1,153 +1,177 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+  import { page } from '$app/stores';
+  import { enhance } from '$app/forms';
+  import { fade } from 'svelte/transition';
+  import SearchInput from '$lib/components/SearchInput.svelte';
+  import ProductFilterPanel from '$lib/components/ProductFilterPanel.svelte';
+  import FilterChips from '$lib/components/FilterChips.svelte';
+  import { ChevronDown, FunnelIcon, XMarkIcon, Squares2X2Icon, ListBulletIcon } from '@heroicons/vue/24/outline';
 
-	// Productos de ejemplo
-	let products = [
-		{
-			id: 1,
-			name: 'Zapatilla Urbana Premium',
-			price: 15000,
-			originalPrice: 18000,
-			image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
-			category: 'Urbana',
-			brand: 'Nike',
-			rating: 4.5,
-			reviews: 128,
-			isNew: true,
-			isOnSale: true,
-			sizes: ['38', '39', '40', '41', '42', '43', '44'],
-			colors: ['Negro', 'Blanco', 'Gris']
-		},
-		{
-			id: 2,
-			name: 'Zapatilla Deportiva Runner',
-			price: 22000,
-			image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop',
-			category: 'Deportiva',
-			brand: 'Adidas',
-			rating: 4.8,
-			reviews: 95,
-			isNew: false,
-			isOnSale: false,
-			sizes: ['39', '40', '41', '42', '43', '44', '45'],
-			colors: ['Blanco', 'Azul', 'Rojo']
-		},
-		{
-			id: 3,
-			name: 'Zapatilla Casual Comfort',
-			price: 12000,
-			originalPrice: 15000,
-			image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop',
-			category: 'Casual',
-			brand: 'Puma',
-			rating: 4.3,
-			reviews: 67,
-			isNew: false,
-			isOnSale: true,
-			sizes: ['38', '39', '40', '41', '42'],
-			colors: ['Negro', 'Blanco']
-		},
-		{
-			id: 4,
-			name: 'Zapatilla Elegante Classic',
-			price: 18000,
-			image: 'https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=400&h=400&fit=crop',
-			category: 'Elegante',
-			brand: 'Converse',
-			rating: 4.7,
-			reviews: 89,
-			isNew: true,
-			isOnSale: false,
-			sizes: ['36', '37', '38', '39', '40', '41', '42'],
-			colors: ['Negro', 'Blanco', 'Marrón']
-		},
-		{
-			id: 5,
-			name: 'Zapatilla Outdoor Adventure',
-			price: 25000,
-			originalPrice: 30000,
-			image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop',
-			category: 'Outdoor',
-			brand: 'Salomon',
-			rating: 4.6,
-			reviews: 156,
-			isNew: false,
-			isOnSale: true,
-			sizes: ['40', '41', '42', '43', '44', '45', '46'],
-			colors: ['Verde', 'Negro', 'Azul']
-		},
-		{
-			id: 6,
-			name: 'Zapatilla Minimalist Design',
-			price: 16000,
-			image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop',
-			category: 'Minimalista',
-			brand: 'Vans',
-			rating: 4.4,
-			reviews: 73,
-			isNew: true,
-			isOnSale: false,
-			sizes: ['38', '39', '40', '41', '42', '43'],
-			colors: ['Blanco', 'Negro', 'Gris']
-		}
-	];
-
-	// Filtros
-	let selectedCategory = 'Todas';
-	let selectedBrand = 'Todas';
-	let selectedPriceRange = 'Todos';
-	let selectedSize = 'Todas';
-	let selectedColor = 'Todas';
-	let sortBy = 'relevance';
-	let showFilters = false;
-
-	// Obtener opciones únicas
-	$: categories = ['Todas', ...new Set(products.map(p => p.category))];
-	$: brands = ['Todas', ...new Set(products.map(p => p.brand))];
-	$: sizes = ['Todas', ...new Set(products.flatMap(p => p.sizes))];
-	$: colors = ['Todas', ...new Set(products.flatMap(p => p.colors))];
-
-	// Filtrar y ordenar productos
-	$: filteredProducts = products
-		.filter(product => {
-			if (selectedCategory !== 'Todas' && product.category !== selectedCategory) return false;
-			if (selectedBrand !== 'Todas' && product.brand !== selectedBrand) return false;
-			if (selectedSize !== 'Todas' && !product.sizes.includes(selectedSize)) return false;
-			if (selectedColor !== 'Todas' && !product.colors.includes(selectedColor)) return false;
-			
-			// Filtro de precio
-			if (selectedPriceRange === '0-10000' && product.price > 10000) return false;
-			if (selectedPriceRange === '10000-20000' && (product.price < 10000 || product.price > 20000)) return false;
-			if (selectedPriceRange === '20000-30000' && (product.price < 20000 || product.price > 30000)) return false;
-			if (selectedPriceRange === '30000+' && product.price < 30000) return false;
-			
-			return true;
-		})
-		.sort((a, b) => {
-			switch (sortBy) {
-				case 'price-low':
-					return a.price - b.price;
-				case 'price-high':
-					return b.price - a.price;
-				case 'rating':
-					return b.rating - a.rating;
-				case 'newest':
-					return b.isNew ? 1 : -1;
-				case 'name':
-					return a.name.localeCompare(b.name);
-				default:
-					return 0;
-			}
-		});
-
-	function clearFilters() {
-		selectedCategory = 'Todas';
-		selectedBrand = 'Todas';
-		selectedPriceRange = 'Todos';
-		selectedSize = 'Todas';
-		selectedColor = 'Todas';
-		sortBy = 'relevance';
-	}
+  // Load data from the server
+  export let data;
+  
+  // State
+  let loading = false;
+  let error = data.error || null;
+  let products = data.products || [];
+  let meta = data.meta || { total: 0, currentPage: 1, totalPages: 1 };
+  let currentFilters = data.currentFilters || {};
+  let viewMode = 'grid'; // 'grid' or 'list'
+  let showMobileFilters = false;
+  
+  // Get filter options from server data
+  $: filterOptions = data.filterOptions || {
+    categories: [],
+    brands: [],
+    sizes: [],
+    colors: []
+  };
+  
+  // Format price
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0
+    }).format(price);
+  };
+  
+  // Get active filters for chips
+  $: activeFilters = [
+    ...(currentFilters.categories || []).map(id => ({
+      id,
+      label: id,
+      groupId: 'categories',
+      groupLabel: 'Categoría',
+      value: id
+    })),
+    ...(currentFilters.brands || []).map(id => ({
+      id,
+      label: id,
+      groupId: 'brands',
+      groupLabel: 'Marca',
+      value: id
+    })),
+    ...(currentFilters.sizes || []).map(id => ({
+      id,
+      label: id,
+      groupId: 'sizes',
+      groupLabel: 'Talla',
+      value: id
+    })),
+    ...(currentFilters.colors || []).map(id => ({
+      id,
+      label: id,
+      groupId: 'colors',
+      groupLabel: 'Color',
+      value: id
+    })),
+    ...(currentFilters.minPrice ? [{
+      id: 'min-price',
+      label: `Mín: $${currentFilters.minPrice}`,
+      groupId: 'price',
+      groupLabel: 'Precio',
+      value: currentFilters.minPrice
+    }] : []),
+    ...(currentFilters.maxPrice ? [{
+      id: 'max-price',
+      label: `Máx: $${currentFilters.maxPrice}`,
+      groupId: 'price',
+      groupLabel: 'Precio',
+      value: currentFilters.maxPrice
+    }] : [])
+  ];
+  
+  // Handle filter removal
+  const removeFilter = (filter) => {
+    const url = new URL(window.location.href);
+    
+    switch (filter.groupId) {
+      case 'categories':
+        url.searchParams.delete('category');
+        currentFilters.categories = currentFilters.categories?.filter(c => c !== filter.id) || [];
+        currentFilters.categories.forEach(cat => url.searchParams.append('category', cat));
+        break;
+      case 'brands':
+        url.searchParams.delete('brand');
+        currentFilters.brands = currentFilters.brands?.filter(b => b !== filter.id) || [];
+        currentFilters.brands.forEach(brand => url.searchParams.append('brand', brand));
+        break;
+      case 'sizes':
+        url.searchParams.delete('size');
+        currentFilters.sizes = currentFilters.sizes?.filter(s => s !== filter.id) || [];
+        currentFilters.sizes.forEach(size => url.searchParams.append('size', size));
+        break;
+      case 'colors':
+        url.searchParams.delete('color');
+        currentFilters.colors = currentFilters.colors?.filter(c => c !== filter.id) || [];
+        currentFilters.colors.forEach(color => url.searchParams.append('color', color));
+        break;
+      case 'price':
+        if (filter.id === 'min-price') {
+          url.searchParams.delete('minPrice');
+          delete currentFilters.minPrice;
+        } else if (filter.id === 'max-price') {
+          url.searchParams.delete('maxPrice');
+          delete currentFilters.maxPrice;
+        }
+        break;
+    }
+    
+    // Reset to first page when filters change
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+  };
+  
+  // Clear all filters
+  const clearAllFilters = () => {
+    const url = new URL(window.location.href);
+    url.search = ''; // Remove all query parameters
+    window.location.href = url.toString();
+  };
+  
+  // Handle search
+  const handleSearch = (event) => {
+    const searchQuery = event.detail.value;
+    const url = new URL(window.location.href);
+    
+    if (searchQuery) {
+      url.searchParams.set('q', searchQuery);
+    } else {
+      url.searchParams.delete('q');
+    }
+    
+    // Reset to first page on new search
+    url.searchParams.delete('page');
+    
+    window.location.href = url.toString();
+  };
+  
+  // Handle sort change
+  const handleSortChange = (event) => {
+    const sortBy = event.target.value;
+    const url = new URL(window.location.href);
+    
+    if (sortBy && sortBy !== 'relevance') {
+      url.searchParams.set('sortBy', sortBy);
+    } else {
+      url.searchParams.delete('sortBy');
+    }
+    
+    window.location.href = url.toString();
+  };
+  
+  // Handle page change
+  const goToPage = (page) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
+    window.location.href = url.toString();
+  };
+  
+  // Toggle mobile filters
+  const toggleMobileFilters = () => {
+    showMobileFilters = !showMobileFilters;
+  };
 
 	function calculateDiscount(originalPrice: number, currentPrice: number) {
 		return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
