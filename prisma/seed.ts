@@ -5,6 +5,43 @@ const prisma = new PrismaClient();
 async function main() {
 	console.log('🌱 Iniciando seed de la base de datos...');
 
+	// Crear usuarios de ejemplo
+	const users = await Promise.all([
+		prisma.user.upsert({
+			where: { id: 1 },
+			update: {},
+			create: {
+				id: 1,
+				email: 'usuario1@ejemplo.com',
+				name: 'Usuario de Prueba 1',
+				password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
+				role: 'USER'
+			}
+		}),
+		prisma.user.upsert({
+			where: { id: 2 },
+			update: {},
+			create: {
+				id: 2,
+				email: 'usuario2@ejemplo.com',
+				name: 'Usuario de Prueba 2',
+				password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
+				role: 'USER'
+			}
+		}),
+		prisma.user.upsert({
+			where: { id: 3 },
+			update: {},
+			create: {
+				id: 3,
+				email: 'admin@ejemplo.com',
+				name: 'Administrador',
+				password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
+				role: 'ADMIN'
+			}
+		})
+	]);
+
 	// Crear productos de ejemplo
 	const products = await Promise.all([
 		prisma.product.upsert({
@@ -82,12 +119,38 @@ async function main() {
 			create: {
 				id: 1,
 				userId: 1,
-				products: [
-					{ productId: 1, quantity: 2, size: '40', color: 'Negro' },
-					{ productId: 3, quantity: 1, size: '41', color: 'Blanco' }
-				],
+				items: {
+					create: [
+						{
+							product: { connect: { id: 1 } },
+							quantity: 2,
+							size: '40',
+							color: 'Negro',
+							price: 129.99
+						},
+						{
+							product: { connect: { id: 3 } },
+							quantity: 1,
+							size: '41',
+							color: 'Blanco',
+							price: 189.99
+						}
+					]
+				},
 				total: 349.97,
-				status: 'pendiente'
+				subtotal: 319.97,
+				tax: 30.00,
+				shippingCost: 0.00,
+				status: 'PENDING',
+				contactInfo: {
+					name: 'Cliente de Prueba',
+					email: 'cliente@ejemplo.com',
+					phone: '+5491122334455',
+					address: 'Calle Falsa 123',
+					city: 'Buenos Aires',
+					country: 'Argentina',
+					zipCode: 'C1234ABC'
+				}
 			}
 		}),
 		prisma.order.upsert({
@@ -96,17 +159,37 @@ async function main() {
 			create: {
 				id: 2,
 				userId: 2,
-				products: [
-					{ productId: 2, quantity: 1, size: '42', color: 'Azul' }
-				],
+				items: {
+					create: [
+						{
+							product: { connect: { id: 2 } },
+							quantity: 1,
+							size: '42',
+							color: 'Azul',
+							price: 159.99
+						}
+					]
+				},
 				total: 179.99,
-				status: 'enviado'
+				subtotal: 159.99,
+				tax: 20.00,
+				shippingCost: 0.00,
+				status: 'SHIPPED',
+				contactInfo: {
+					name: 'Otro Cliente',
+					email: 'otro@ejemplo.com',
+					phone: '+5491166778899',
+					address: 'Avenida Siempreviva 742',
+					city: 'Córdoba',
+					country: 'Argentina',
+					zipCode: 'X5000'
+				}
 			}
 		})
 	]);
 
 	console.log('✅ Seed completado exitosamente!');
-	console.log(`📊 Creados: ${products.length} productos, ${orders.length} órdenes`);
+	console.log(`📊 Creados: ${users.length} usuarios, ${products.length} productos, ${orders.length} órdenes`);
 }
 
 main()
