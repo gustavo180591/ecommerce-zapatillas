@@ -1,106 +1,71 @@
-# Plan de Desarrollo - E-commerce de Zapatillas
+# Plan de Desarrollo — ecommerce-zapatillas
 
-## Visión General
-Desarrollo de una plataforma de comercio electrónico especializada en la venta de zapatillas, con un enfoque en experiencia de usuario, rendimiento y funcionalidades modernas.
+Este plan describe todas las etapas para construir el sistema desde 0% hasta 100%, con checklist de tareas.
 
-## Fases del Proyecto
+## 1. Preparación del entorno
+- [x] Definir stack tecnológico (SvelteKit 2, Svelte 5, Prisma, PostgreSQL, Docker, Tailwind CSS 4)
+- [x] Crear repositorio inicial
+- [x] Configurar entorno Docker (PostgreSQL, MinIO)
+- [x] Crear estructura de carpetas base
+- [x] Agregar README.md inicial
 
-### 1. Configuración Inicial (Semana 1)
-- [ ] Configurar entorno de desarrollo
-- [ ] Inicializar repositorio Git
-- [ ] Configurar estructura básica del proyecto
-- [ ] Configurar herramientas de desarrollo (linter, formateador)
+## 2. Base de datos y ORM
+- [x] Definir schema.prisma completo
+- [x] Configurar Prisma Client
+- [x] Crear migraciones iniciales
+- [x] Preparar scripts de seed
+- [x] Probar conexión a DB en local
 
-### 2. Desarrollo Frontend (Semanas 2-4)
-- [ ] Diseñar y maquetar la interfaz de usuario
-- [ ] Implementar páginas principales:
-  - [ ] Página de inicio
-  - [ ] Catálogo de productos
-  - [ ] Páginas de producto individual
-  - [ ] Carrito de compras
-  - [ ] Checkout
-  - [ ] Área de usuario
-- [ ] Implementar diseño responsive
-- [ ] Integrar animaciones y transiciones
+## 3. Backend (SvelteKit endpoints)
+- [x] Configurar autenticación (Lucia/Auth.js)
+- [x] Endpoints públicos: listar productos, ver producto
+- [ ] Endpoints carrito: agregar, quitar, actualizar
+- [ ] Endpoint checkout: crear orden y preferencia MP
+- [ ] Webhook Mercado Pago
+- [ ] Endpoints admin protegidos
 
-### 3. Desarrollo Backend (Semanas 5-7)
-- [ ] Configurar base de datos
-- [ ] Implementar API REST
-- [ ] Desarrollar sistema de autenticación
-- [ ] Implementar gestión de productos
-- [ ] Desarrollar sistema de carrito
-- [ ] Implementar proceso de pago
+## 4. Frontend — UX/UI
+- [x] Layout base + Tailwind config
+- [ ] Página Home
+- [ ] Página catálogo con filtros
+- [ ] Página detalle de producto
+- [ ] Carrito persistente
+- [ ] Checkout y confirmación
+- [ ] Área de usuario (pedidos, direcciones, favoritos)
+- [ ] Panel Admin CRUD
 
-### 4. Integración y Pruebas (Semana 8)
-- [ ] Integrar frontend con backend
-- [ ] Realizar pruebas unitarias
-- [ ] Realizar pruebas de integración
-- [ ] Realizar pruebas de usabilidad
-- [ ] Optimizar rendimiento
+## 5. Funcionalidades clave
+- [ ] Búsqueda con PostgreSQL full-text
+- [ ] Comparador de talles
+- [ ] Notificaciones de reposición
+- [ ] Dark mode
+- [x] Validación Zod en formularios
 
-### 5. Despliegue (Semana 9)
-- [ ] Configurar entorno de producción
-- [ ] Desplegar aplicación
-- [ ] Configurar dominio y SSL
-- [ ] Realizar pruebas finales
+## 6. Seguridad y rendimiento
+- [x] Middleware de autenticación
+- [ ] Rate limiting en rutas sensibles
+- [ ] Sanitización de datos
+- [ ] Configuración de cache
+- [ ] Optimización de imágenes
 
-### 6. Lanzamiento y Post-Lanzamiento (Semana 10)
-- [ ] Lanzamiento oficial
-- [ ] Monitoreo de rendimiento
-- [ ] Recolección de feedback
-- [ ] Plan de mejoras continuas
+## 7. SEO y analítica
+- [ ] Metadatos y Open Graph
+- [ ] Sitemap y RSS
+- [ ] Integrar Plausible/GA4
 
-## Tecnologías Propuestas
+## 8. Testing y calidad
+- [ ] Tests unitarios (Vitest)
+- [ ] Tests E2E (Playwright)
+- [x] Linter y formateo automático
+- [ ] Configuración CI/CD
 
-### Frontend
-- React.js o Next.js
-- Tailwind CSS o Styled Components
-- Redux o Context API para manejo de estado
-- React Query para manejo de datos
+## 9. Despliegue
+- [ ] Configurar variables en producción
+- [ ] Desplegar en VPS/Kubernetes
+- [ ] Probar integraciones en producción
 
-### Backend
-- Node.js con Express o NestJS
-- Base de datos: PostgreSQL o MongoDB
-- Autenticación: JWT
-- Pasarela de pago: Stripe o MercadoPago
-
-### DevOps
-- Git para control de versiones
-- Docker para contenedorización
-- CI/CD con GitHub Actions o similar
-- Despliegue en Vercel, Netlify o AWS
-
-## Estructura de Carpetas
-```
-/ecommerce-zapatillas
-  /frontend
-    /public
-    /src
-      /components
-      /pages
-      /styles
-      /hooks
-      /context
-      /services
-  /backend
-    /src
-      /controllers
-      /models
-      /routes
-      /middlewares
-      /config
-  /docs
-  /tests
-```
-
-## Próximos Pasos
-1. Definir stack tecnológico exacto
-2. Crear wireframes de las pantallas principales
-3. Configurar entorno de desarrollo
-4. Comenzar con el desarrollo del frontend
-
-## Notas Adicionales
-- Priorizar experiencia móvil (mobile-first)
-- Implementar buenas prácticas de SEO
-- Considerar accesibilidad desde el inicio
-- Planear estrategia de testing
+## 10. Extras futuros
+- [ ] Recomendaciones con embeddings
+- [ ] CMS headless para contenido
+- [ ] Multi-moneda
+- [ ] Integración logística

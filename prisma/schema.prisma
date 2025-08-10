@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -11,286 +10,108 @@ datasource db {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique
-  name         String?
-  password     String
-  role         String         @default("USER") // ADMIN, USER, MODERATOR
-  cart         Cart?
-  orders       Order[]
-  reviews          Review[]
-  reviewVotes      ReviewHelpful[]
-  shippingAddresses ShippingAddress[]
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-}
-
-model Product {
-  id            Int              @id @default(autoincrement())
-  name          String
-  description   String?
-  price         Float
-  image         String
-  sizes         String[]         // Available sizes (e.g., ["38", "39", "40"])
-  colors        String[]         // Available colors (e.g., ["Negro", "Blanco"])
-  stock         Int              @default(0) // Total stock across all variants
-  category      Category?        @relation(fields: [categoryId], references: [id])
-  categoryId    Int?
-  variants      ProductVariant[] // Product variants with specific stock
-  cartItems     CartItem[]
-  orderItems    OrderItem[]
-  reviews       Review[]
-  averageRating Float?           @default(0)
-  reviewCount   Int              @default(0)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-}
-
-model ProductVariant {
-  id        Int      @id @default(autoincrement())
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int
-  size      String
-  color     String
-  stock     Int      @default(0)
-  sku       String?  @unique
-  barcode   String?
-  
-  @@unique([productId, size, color])
-  
+  id        String   @id @default(cuid())
+  email     String   @unique
+  hash      String
+  name      String?
+  role      Role     @default(CUSTOMER)
+  addresses Address[]
+  orders    Order[]
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum Currency {
+  ARS
+  USD
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELED
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id    String   @id @default(cuid())
+  name  String
+  slug  String   @unique
+  products Product[]
 }
 
-model Cart {
-  id        Int        @id @default(autoincrement())
-  user      User       @relation(fields: [userId], references: [id])
-  userId    Int        @unique
-  items     CartItem[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+model Product {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  description String?
+  categoryId  String
+  category    Category     @relation(fields: [categoryId], references: [id])
+  variants    Variant[]
+  images      ProductImage[]
+  price       Decimal      @db.Decimal(10,2)
+  currency    Currency     @default(ARS)
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
 }
 
-model CartItem {
-  id        Int      @id @default(autoincrement())
-  cart      Cart     @relation(fields: [cartId], references: [id])
-  cartId    Int
+model Variant {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  sku        String   @unique
+  color      String?
+  size       String?
+  stock      Int      @default(0)
+  priceDiff  Decimal? @db.Decimal(10,2)
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  position  Int      @default(0)
   product   Product  @relation(fields: [productId], references: [id])
-  productId Int
-  quantity  Int      @default(1)
-  size      String
-  color     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([cartId, productId, size, color])
 }
 
-// Order status values
-enum OrderStatus {
-  DRAFT          // Borrador (carrito)
-  PENDING        // Pendiente de pago
-  PROCESSING     // Pago recibido, preparando envío
-  SHIPPED        // Enviado
-  DELIVERED      // Entregado
-  CANCELLED      // Cancelado
-  REFUNDED       // Reembolsado
-  FAILED         // Falló el pago
-  ON_HOLD        // En espera (por revisión)
-  COMPLETED      // Completado (entregado y finalizado)
-}
-
-// Payment status values
-enum PaymentStatus {
-  REQUIRES_ACTION  // Requiere autenticación adicional
-  REQUIRES_PAYMENT_METHOD  // Requiere método de pago
-  REQUIRES_CONFIRMATION    // Requiere confirmación
-  PROCESSING       // Procesando
-  REQUIRES_CAPTURE // Requiere captura
-  CANCELED         // Cancelado
-  SUCCEEDED        // Exitoso
-  FAILED           // Fallido
-  REFUNDED         // Reembolsado
-  PARTIALLY_REFUNDED // Parcialmente reembolsado
-  DISPUTED         // En disputa
-  REQUIRES_PAYOUT  // Requiere pago
-}
-
-// Review status values
-enum ReviewStatus {
-  PENDING
-  APPROVED
-  REJECTED
+model Address {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  name    String?
+  phone   String?
+  street  String
+  city    String
+  state   String?
+  zip     String?
+  country String @default("AR")
 }
 
 model Order {
-  id              Int            @id @default(autoincrement())
-  user            User           @relation(fields: [userId], references: [id])
-  userId          Int
-  items           OrderItem[]
-  total           Float
-  subtotal        Float          // Precio antes de impuestos y envío
-  tax             Float          // Impuestos calculados
-  shippingCost    Float          // Costo de envío
-  status          OrderStatus    @default(DRAFT)
-  payment         Payment?       @relation(fields: [paymentId], references: [id])
-  paymentId       String?        @unique
-  shipping        ShippingAddress? @relation(fields: [shippingId], references: [id])
-  shippingId      Int?
-  contactInfo     Json           // Información de contacto
-  notes           String?        // Notas adicionales del pedido
-  trackingNumber  String?        // Número de seguimiento del envío
-  shippingCarrier String?        // Empresa de transporte
-  
-  // Metadata
-  ipAddress       String?        // Dirección IP del cliente
-  userAgent       String?        // User agent del navegador
-  
-  // Timestamps
-  paidAt          DateTime?      // Cuando se completó el pago
-  shippedAt       DateTime?      // Cuando se envió
-  deliveredAt     DateTime?      // Cuando se entregó
-  cancelledAt     DateTime?      // Cuando se canceló
-  refundedAt      DateTime?      // Cuando se reembolsó
-  
-  // System fields
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
+  id          String      @id @default(cuid())
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
+  status      OrderStatus @default(PENDING)
+  total       Decimal     @db.Decimal(10,2)
+  currency    Currency    @default(ARS)
+  mpPrefId    String?
+  items       OrderItem[]
+  createdAt   DateTime    @default(now())
 }
-
-model Payment {
-  id              String        @id @default(uuid())
-  order           Order[]
-  amount          Float
-  currency        String        @default("USD")
-  status          PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
-  paymentMethod   String?       // card, transfer, cash, etc.
-  paymentProvider String?       // stripe, mercadopago, etc.
-  providerId      String?       // ID del pago en el proveedor
-  receiptUrl      String?       // URL del recibo/recibo
-  
-  // Datos de la tarjeta (opcional, cifrado)
-  cardLast4       String?
-  cardBrand       String?
-  cardExpMonth    Int?
-  cardExpYear     Int?
-  
-  // Metadata
-  metadata        Json?         // Datos adicionales del proveedor
-  
-  // Timestamps
-  paidAt          DateTime?
-  failedAt        DateTime?
-  
-  // System fields
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
-  @@index([providerId])
-  @@index([status])
-  @@index([createdAt])
-}
-
-model Review {
-  id            String         @id @default(cuid())
-  rating        Int            // 1-5 stars
-  title         String         @db.VarChar(200)
-  comment       String         @db.Text
-  status        ReviewStatus   @default(PENDING)
-  isVerified    Boolean        @default(false)
-  helpfulVotes  Int            @default(0)
-  user          User           @relation(fields: [userId], references: [id])
-  userId        Int
-  product       Product        @relation(fields: [productId], references: [id])
-  productId     Int
-  images        ReviewImage[]
-  helpfulVoters ReviewHelpful[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  @@index([productId])
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-}
-
-model ReviewImage {
-  id        String   @id @default(cuid())
-  url       String
-  review    Review   @relation(fields: [reviewId], references: [id])
-  reviewId  String
-  createdAt DateTime @default(now())
-
-  @@index([reviewId])
-}
-
-model ReviewHelpful {
-  user      User    @relation(fields: [userId], references: [id])
-  userId    Int
-  review    Review  @relation(fields: [reviewId], references: [id])
-  reviewId  String
-  createdAt DateTime @default(now())
-
-  @@id([userId, reviewId])
-  @@index([reviewId])
-}
-
-model ShippingAddress {
-  id          Int       @id @default(autoincrement())
-  name        String
-  address     String
-  address2    String?
-  city        String
-  state       String
-  postalCode  String
-  country     String    @default("Argentina")
-  phone       String?
-  email       String
-  
-  // Relaciones
-  orders      Order[]
-  user        User?     @relation(fields: [userId], references: [id])
-  userId      Int?
-  
-  // System fields
-  isDefault   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  @@index([userId])
-}
-
 
 model OrderItem {
-  id        Int      @id @default(autoincrement())
-  order     Order    @relation(fields: [orderId], references: [id])
-  orderId   Int
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int
+  id        String  @id @default(cuid())
+  orderId   String
+  variantId String
   quantity  Int
-  price     Float
-  size      String
-  color     String
-  createdAt DateTime @default(now())
-}
-
-// Tabla para sesiones de carrito de invitados
-model GuestCart {
-  id        String    @id @default(uuid())
-  items     Json      // { productId: number, quantity: number, size: string, color: string }[]
-  expiresAt DateTime  @default(dbgenerated("(now() + '7 days'::interval)"))
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  unitPrice Decimal @db.Decimal(10,2)
+  order     Order   @relation(fields: [orderId], references: [id])
+  variant   Variant @relation(fields: [variantId], references: [id])
 }
