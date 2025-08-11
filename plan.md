@@ -1,6 +1,7 @@
 # Plan de Desarrollo — ecommerce-zapatillas
 
-Este plan describe todas las etapas para construir el sistema desde 0% hasta 100%, con checklist de tareas.
+Este plan describe todas las etapas para construir el sistema desde 0% hasta 100%, con checklist de tareas.  
+Las tareas marcadas con [ ] están pendientes, [x] completadas.
 
 ## 1. Preparación del entorno
 - [x] Definir stack tecnológico (SvelteKit 2, Svelte 5, Prisma, PostgreSQL, Docker, Tailwind CSS 4)
@@ -13,62 +14,62 @@ Este plan describe todas las etapas para construir el sistema desde 0% hasta 100
 ## 2. Base de datos y ORM
 - [x] Definir schema.prisma completo
 - [x] Configurar Prisma Client
-- [x] Crear migraciones iniciales
+- [x] Crear migraciones iniciales (`npx prisma migrate dev --name init`)
 - [x] Configurar relaciones entre modelos
-- [x] Preparar scripts de seed
+- [x] Preparar scripts de seed (`prisma/seed.ts`)
 - [x] Probar conexión a DB en local
 - [x] Configurar variables de entorno para desarrollo local
 
 ## 3. Backend (SvelteKit endpoints)
-- [x] Configurar autenticación (Lucia/Auth.js)
+- [x] Configurar autenticación (JWT implementado)
 - [x] Endpoints públicos: listar productos, ver producto
-- [ ] Endpoints carrito: agregar, quitar, actualizar
-- [ ] Endpoint checkout: crear orden y preferencia MP
-- [ ] Webhook Mercado Pago
-- [ ] Endpoints admin protegidos
+- [x] Endpoints carrito: agregar, quitar, actualizar
+- [x] Endpoint checkout: crear orden
+- [ ] Webhook Mercado Pago (`src/routes/api/webhooks/mercadopago/+server.ts`)
+- [x] Endpoints admin protegidos (middleware en `hooks.server.ts`)
 
 ## 4. Frontend — UX/UI
 - [x] Layout base + Tailwind config
-- [ ] Página Home
-- [ ] Página catálogo con filtros
-- [ ] Página detalle de producto
-- [ ] Carrito persistente
-- [ ] Checkout y confirmación
-- [ ] Área de usuario (pedidos, direcciones, favoritos)
-- [ ] Panel Admin CRUD
+- [x] Página Home (`src/routes/+page.svelte`)
+- [x] Página catálogo con filtros (`src/routes/productos/+page.svelte`)
+- [x] Página detalle de producto (`src/routes/productos/[slug]/+page.svelte`)
+- [x] Carrito persistente (`src/lib/cart.ts`)
+- [x] Checkout y confirmación (`src/routes/checkout/+page.svelte`)
+- [x] Área de usuario (pedidos, direcciones, favoritos)
+- [x] Panel Admin CRUD (productos, órdenes, cupones)
 
 ## 5. Funcionalidades clave
-- [ ] Búsqueda con PostgreSQL full-text
+- [ ] Búsqueda con PostgreSQL full-text (`src/routes/buscar/+page.svelte` + query Prisma raw)
 - [ ] Comparador de talles
 - [ ] Notificaciones de reposición
-- [ ] Dark mode
-- [x] Validación Zod en formularios
+- [ ] Dark mode (Tailwind + toggle persistente)
+- [x] Validación Zod en formularios (`src/lib/zod-schemas.ts`)
 
 ## 6. Seguridad y rendimiento
-- [x] Middleware de autenticación
-- [ ] Rate limiting en rutas sensibles
-- [ ] Sanitización de datos
-- [ ] Configuración de cache
-- [ ] Optimización de imágenes
+- [x] Middleware de autenticación (`hooks.server.ts`)
+- [ ] Rate limiting en rutas sensibles (Redis o in-memory store)
+- [ ] Sanitización de datos en endpoints
+- [ ] Configuración de cache HTTP y SvelteKit
+- [ ] Optimización de imágenes (MinIO + sharp)
 
 ## 7. SEO y analítica
-- [ ] Metadatos y Open Graph
+- [ ] Metadatos y Open Graph (`+layout.ts` y `+page.ts`)
 - [ ] Sitemap y RSS
-- [ ] Integrar Plausible/GA4
+- [ ] Integrar Plausible o Google Analytics 4
 
 ## 8. Testing y calidad
 - [ ] Tests unitarios (Vitest)
 - [ ] Tests E2E (Playwright)
-- [x] Linter y formateo automático
-- [ ] Configuración CI/CD
+- [x] Linter y formateo automático (ESLint + Prettier)
+- [ ] Configuración CI/CD (GitHub Actions o GitLab CI)
 
 ## 9. Despliegue
 - [ ] Configurar variables en producción
 - [ ] Desplegar en VPS/Kubernetes
-- [ ] Probar integraciones en producción
+- [ ] Probar integraciones en producción (pagos, envíos, emails)
 
 ## 10. Extras futuros
-- [ ] Recomendaciones con embeddings
-- [ ] CMS headless para contenido
+- [ ] Recomendaciones con embeddings (IA)
+- [ ] CMS headless para contenido (ej. Strapi, Sanity)
 - [ ] Multi-moneda
-- [ ] Integración logística
+- [ ] Integración logística (Andreani, Correo Argentino, etc.)

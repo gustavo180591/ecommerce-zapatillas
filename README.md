@@ -78,18 +78,27 @@ ecommerce-zapatillas/
 │  │  │  ├─ +page.svelte
 │  │  │  ├─ pedidos/+page.svelte
 │  │  │  └─ direcciones/+page.svelte
-│  │  └─ admin/
-│  │     ├─ +layout.svelte
-│  │     ├─ productos/+page.svelte
-│  │     ├─ ordenes/+page.svelte
-│  │     └─ cupones/+page.svelte
-│  ├─ hooks.server.ts
-│  └─ app.d.ts
+│  │  ├─ admin/
+│  │  │  ├─ +layout.svelte
+│  │  │  ├─ productos/+page.svelte
+│  │  │  ├─ ordenes/+page.svelte
+│  │  │  └─ cupones/+page.svelte
+│  │  └─ api/
+│  │     ├─ auth/
+│  │     │  ├─ login/+server.ts v
+│  │     │  └─ logout/+server.ts v
+│  │     ├─ cart/+server.ts v
+│  │     ├─ checkout/+server.ts v
+│  │     └─ webhooks/
+│  │        └─ mercadopago/+server.ts v
+│  ├─ hooks.server.ts v
+│  └─ app.d.ts v
 ├─ static/
-├─ .env.example
-├─ docker-compose.yml
+├─ .env.example v
+├─ docker-compose.yml v
 ├─ package.json
-└─ README.md
+└─ README.md v
+
 ```
 
 ---
