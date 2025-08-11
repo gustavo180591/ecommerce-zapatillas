@@ -3,14 +3,23 @@
     "private": true,
     "type": "module",
     "scripts": {
-      "dev": "vite",
-      "build": "vite build",
-      "preview": "vite preview --host 0.0.0.0 --port 5173"
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview --host 0.0.0.0 --port 5173"
     },
     "devDependencies": {
-      "@sveltejs/kit": "latest",
-      "svelte": "latest",
-      "vite": "latest"
+        "@sveltejs/kit": "latest",
+        "@types/uuid": "^10.0.0",
+        "svelte": "latest",
+        "vite": "latest"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.13.0",
+        "argon2": "^0.43.1",
+        "jose": "^6.0.12",
+        "mercadopago": "^2.8.0",
+        "prisma": "^6.13.0",
+        "uuid": "^11.1.0",
+        "zod": "^4.0.17"
     }
-  }
-  
+}

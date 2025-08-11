@@ -6,6 +6,7 @@ Este plan describe todas las etapas para construir el sistema desde 0% hasta 100
 - [x] Definir stack tecnológico (SvelteKit 2, Svelte 5, Prisma, PostgreSQL, Docker, Tailwind CSS 4)
 - [x] Crear repositorio inicial
 - [x] Configurar entorno Docker (PostgreSQL, MinIO)
+- [x] Configurar Prisma y base de datos
 - [x] Crear estructura de carpetas base
 - [x] Agregar README.md inicial
 
@@ -13,8 +14,10 @@ Este plan describe todas las etapas para construir el sistema desde 0% hasta 100
 - [x] Definir schema.prisma completo
 - [x] Configurar Prisma Client
 - [x] Crear migraciones iniciales
+- [x] Configurar relaciones entre modelos
 - [x] Preparar scripts de seed
 - [x] Probar conexión a DB en local
+- [x] Configurar variables de entorno para desarrollo local
 
 ## 3. Backend (SvelteKit endpoints)
 - [x] Configurar autenticación (Lucia/Auth.js)

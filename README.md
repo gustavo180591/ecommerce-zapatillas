@@ -48,26 +48,26 @@
 ecommerce-zapatillas/
 ├─ docker/
 │  ├─ postgres/
-│  │  └─ init.sql
+│  │  └─ init.sql v
 │  └─ minio/
 ├─ prisma/
-│  ├─ schema.prisma
+│  ├─ schema.prisma v
 │  └─ seeds/
-│     └─ seed.ts
+│     └─ seed.ts v
 ├─ src/
 │  ├─ lib/
-│  │  ├─ db.ts
-│  │  ├─ auth.ts
-│  │  ├─ zod-schemas.ts
-│  │  ├─ cart.ts
-│  │  └─ payments.ts
+│  │  ├─ db.ts v
+│  │  ├─ auth.ts v
+│  │  ├─ zod-schemas.ts v
+│  │  ├─ cart.ts v
+│  │  └─ payments.ts v
 │  ├─ routes/
-│  │  ├─ +layout.svelte
-│  │  ├─ +layout.ts
-│  │  ├─ +page.svelte
+│  │  ├─ +layout.svelte v
+│  │  ├─ +layout.ts v
+│  │  ├─ +page.svelte v
 │  │  ├─ productos/
-│  │  │  ├─ +page.svelte
-│  │  │  └─ [slug]/+page.svelte
+│  │  │  ├─ +page.svelte v
+│  │  │  └─ [slug]/+page.svelte v
 │  │  ├─ buscar/+page.svelte
 │  │  ├─ carrito/+page.svelte
 │  │  ├─ checkout/
